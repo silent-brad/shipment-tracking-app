@@ -2,74 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  template: `
-    <div class="login-container">
-      <div class="login-card card fade-in">
-        <div class="text-center mb-4">
-          <h1 class="login-title">📦</h1>
-          <h2>Mini Delivery Tracker</h2>
-          <p class="text-muted">Sign in to track your shipments</p>
-        </div>
-        
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <div class="form-group">
-            <label class="form-label">Username</label>
-            <input 
-              type="text" 
-              class="form-control"
-              [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
-              formControlName="username"
-              placeholder="Enter your username"
-              autocomplete="username">
-            <div class="invalid-feedback" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
-              Username is required
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input 
-              type="password" 
-              class="form-control"
-              [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-              formControlName="password"
-              placeholder="Enter your password"
-              autocomplete="current-password">
-            <div class="invalid-feedback" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-              Password is required
-            </div>
-          </div>
-          
-          <div class="alert alert-danger" *ngIf="errorMessage">
-            {{ errorMessage }}
-          </div>
-          
-          <button 
-            type="submit" 
-            class="btn btn-primary w-100"
-            [disabled]="loginForm.invalid || loading">
-            <span class="spinner spinner-sm me-2" *ngIf="loading"></span>
-            {{ loading ? 'Signing in...' : 'Sign In' }}
-          </button>
-        </form>
-        
-        <div class="login-help mt-4">
-          <div class="card" style="background: var(--bg-secondary);">
-            <h6>Demo Credentials:</h6>
-            <p class="text-sm mb-1"><strong>Admin:</strong> admin / admin123</p>
-            <p class="text-sm mb-0"><strong>User:</strong> user / user123</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  templateUrl: './login.component.html',
   styles: [`
     .login-container {
       min-height: 100vh;

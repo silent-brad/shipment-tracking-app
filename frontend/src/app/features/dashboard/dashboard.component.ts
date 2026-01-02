@@ -1,6 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -22,128 +26,8 @@ interface DashboardStats {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
-    <div class="container py-4">
-      <div class="dashboard-header mb-4">
-        <h1 class="dashboard-title">Dashboard</h1>
-        <p class="text-muted">Track your shipments in real-time</p>
-      </div>
-      
-      <!-- Stats Cards -->
-      <div class="row mb-5">
-        <div class="col">
-          <div class="stat-card card">
-            <div class="stat-icon">📦</div>
-            <div class="stat-content">
-              <div class="stat-number">{{ stats.total }}</div>
-              <div class="stat-label">Total Shipments</div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stat-card card">
-            <div class="stat-icon">🚛</div>
-            <div class="stat-content">
-              <div class="stat-number">{{ stats.inTransit }}</div>
-              <div class="stat-label">In Transit</div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stat-card card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-content">
-              <div class="stat-number">{{ stats.delivered }}</div>
-              <div class="stat-label">Delivered</div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="stat-card card">
-            <div class="stat-icon">⚠️</div>
-            <div class="stat-content">
-              <div class="stat-number">{{ stats.delayed }}</div>
-              <div class="stat-label">Delayed</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Quick Actions -->
-      <div class="row mb-5">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h3>Recent Shipments</h3>
-              <a routerLink="/shipments" class="btn btn-primary btn-sm">View All</a>
-            </div>
-            
-            <div class="shipment-list" *ngIf="recentShipments.length > 0; else noShipments">
-              <div 
-                class="shipment-item d-flex justify-content-between align-items-center"
-                *ngFor="let shipment of recentShipments"
-                (click)="navigateToShipment(shipment.id)">
-                <div class="shipment-info">
-                  <div class="shipment-route">
-                    <strong>{{ shipment.origin }}</strong> → <strong>{{ shipment.destination }}</strong>
-                  </div>
-                  <div class="shipment-meta text-sm text-muted">
-                    {{ shipment.trackingNumber }} • {{ shipment.updatedAt | date:'medium' }}
-                  </div>
-                </div>
-                <div class="shipment-status">
-                  <span class="badge" [ngClass]="getStatusBadgeClass(shipment.status)">
-                    {{ getStatusLabel(shipment.status) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <ng-template #noShipments>
-              <div class="text-center text-muted py-4">
-                <div class="mb-3">📦</div>
-                <p>No shipments yet</p>
-                <a routerLink="/create" class="btn btn-primary btn-sm">Create First Shipment</a>
-              </div>
-            </ng-template>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="card">
-            <h3 class="mb-3">Quick Actions</h3>
-            <div class="d-flex flex-column gap-2">
-              <a routerLink="/create" class="btn btn-primary">
-                <i class="material-icons">add</i>
-                Create Shipment
-              </a>
-              <button class="btn btn-secondary" (click)="refreshData()">
-                <i class="material-icons">refresh</i>
-                Refresh Data
-              </button>
-              <a routerLink="/shipments" class="btn btn-secondary">
-                <i class="material-icons">list</i>
-                View All Shipments
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Overdue Shipments Alert -->
-      <div class="alert alert-warning" *ngIf="overdueShipments.length > 0">
-        <div class="d-flex align-items-center gap-2">
-          <i class="material-icons">warning</i>
-          <div>
-            <strong>{{ overdueShipments.length }} overdue shipment(s)</strong>
-            <p class="mb-0">Some shipments are past their estimated delivery date.</p>
-          </div>
-          <a routerLink="/shipments" class="btn btn-warning btn-sm ms-auto">View</a>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [CommonModule, RouterModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  templateUrl: './dashboard.component.html',
   styles: [`
     .dashboard-title {
       font-size: 2rem;

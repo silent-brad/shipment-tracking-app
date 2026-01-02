@@ -1,44 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule],
-  template: `
-    <div class="app-container">
-      <header class="app-header" *ngIf="isAuthenticated">
-        <div class="container">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-4">
-              <h1 class="app-title">📦 Mini Delivery Tracker</h1>
-              <nav class="nav-links d-flex gap-3">
-                <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
-                <a routerLink="/shipments" routerLinkActive="active" class="nav-link">Shipments</a>
-                <a routerLink="/create" routerLinkActive="active" class="nav-link">Create</a>
-              </nav>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-              <span class="text-sm text-muted">Welcome, {{ currentUser }}</span>
-              <button class="btn btn-secondary btn-sm" (click)="logout()">Logout</button>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      <main class="app-main" [class.no-header]="!isAuthenticated">
-        <router-outlet></router-outlet>
-      </main>
-      
-      <footer class="app-footer" *ngIf="isAuthenticated">
-        <div class="container text-center text-sm text-muted">
-          <p>&copy; 2024 Mini Delivery Tracker. Built with Angular & Spring Boot.</p>
-        </div>
-      </footer>
-    </div>
-  `,
+  imports: [CommonModule, RouterOutlet, RouterModule, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule],
+  templateUrl: './app.component.html',
   styles: [`
     .app-container {
       min-height: 100vh;

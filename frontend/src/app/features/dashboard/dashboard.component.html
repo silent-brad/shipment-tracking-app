@@ -1,0 +1,136 @@
+<div class="container mx-auto py-6 px-4">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+    <p class="text-gray-600">Track your shipments in real-time</p>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <mat-card class="hover:shadow-lg transition-shadow duration-300">
+      <mat-card-content class="flex items-center p-6">
+        <div class="bg-blue-100 p-3 rounded-full mr-4">
+          <mat-icon class="text-blue-600 text-2xl">inventory</mat-icon>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-gray-800">{{ stats.total }}</div>
+          <div class="text-sm text-gray-600">Total Shipments</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="hover:shadow-lg transition-shadow duration-300">
+      <mat-card-content class="flex items-center p-6">
+        <div class="bg-orange-100 p-3 rounded-full mr-4">
+          <mat-icon class="text-orange-600 text-2xl">local_shipping</mat-icon>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-gray-800">{{ stats.inTransit }}</div>
+          <div class="text-sm text-gray-600">In Transit</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="hover:shadow-lg transition-shadow duration-300">
+      <mat-card-content class="flex items-center p-6">
+        <div class="bg-green-100 p-3 rounded-full mr-4">
+          <mat-icon class="text-green-600 text-2xl">check_circle</mat-icon>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-gray-800">{{ stats.delivered }}</div>
+          <div class="text-sm text-gray-600">Delivered</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="hover:shadow-lg transition-shadow duration-300">
+      <mat-card-content class="flex items-center p-6">
+        <div class="bg-red-100 p-3 rounded-full mr-4">
+          <mat-icon class="text-red-600 text-2xl">warning</mat-icon>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-gray-800">{{ stats.delayed }}</div>
+          <div class="text-sm text-gray-600">Delayed</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title class="flex justify-between items-center w-full">
+            <span>Recent Shipments</span>
+            <a mat-raised-button color="primary" routerLink="/shipments" class="text-sm">
+              View All
+            </a>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+        
+        <div class="shipment-list" *ngIf="recentShipments.length > 0; else noShipments">
+          <div 
+            class="shipment-item d-flex justify-content-between align-items-center"
+            *ngFor="let shipment of recentShipments"
+            (click)="navigateToShipment(shipment.id)">
+            <div class="shipment-info">
+              <div class="shipment-route">
+                <strong>{{ shipment.origin }}</strong> → <strong>{{ shipment.destination }}</strong>
+              </div>
+              <div class="shipment-meta text-sm text-muted">
+                {{ shipment.trackingNumber }} • {{ shipment.updatedAt | date:'medium' }}
+              </div>
+            </div>
+            <div class="shipment-status">
+              <span class="badge" [ngClass]="getStatusBadgeClass(shipment.status)">
+                {{ getStatusLabel(shipment.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <ng-template #noShipments>
+          <div class="text-center text-muted py-4">
+            <div class="mb-3">📦</div>
+            <p>No shipments yet</p>
+            <a routerLink="/create" class="btn btn-primary btn-sm">Create First Shipment</a>
+          </div>
+        </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card">
+        <h3 class="mb-3">Quick Actions</h3>
+        <div class="d-flex flex-column gap-2">
+          <a routerLink="/create" class="btn btn-primary">
+            <i class="material-icons">add</i>
+            Create Shipment
+          </a>
+          <button class="btn btn-secondary" (click)="refreshData()">
+            <i class="material-icons">refresh</i>
+            Refresh Data
+          </button>
+          <a routerLink="/shipments" class="btn btn-secondary">
+            <i class="material-icons">list</i>
+            View All Shipments
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overdue Shipments Alert -->
+  <div class="alert alert-warning" *ngIf="overdueShipments.length > 0">
+    <div class="d-flex align-items-center gap-2">
+      <i class="material-icons">warning</i>
+      <div>
+        <strong>{{ overdueShipments.length }} overdue shipment(s)</strong>
+        <p class="mb-0">Some shipments are past their estimated delivery date.</p>
+      </div>
+      <a routerLink="/shipments" class="btn btn-warning btn-sm ms-auto">View</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="min-h-screen flex flex-col">
+  <mat-toolbar color="primary" *ngIf="isAuthenticated" class="shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-6">
+        <h1 class="text-xl font-bold flex items-center gap-2">
+          <mat-icon>local_shipping</mat-icon>
+          Mini Delivery Tracker
+        </h1>
+        <nav class="hidden md:flex items-center gap-4">
+          <a mat-button routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+            <mat-icon>dashboard</mat-icon>
+            Dashboard
+          </a>
+          <a mat-button routerLink="/shipments" routerLinkActive="active" class="nav-link">
+            <mat-icon>inventory_2</mat-icon>
+            Shipments
+          </a>
+          <a mat-button routerLink="/create" routerLinkActive="active" class="nav-link">
+            <mat-icon>add_circle</mat-icon>
+            Create
+          </a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-blue-100">Welcome, {{ currentUser }}</span>
+        <button mat-button (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Logout
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+  
+  <main class="flex-1" [class]="!isAuthenticated ? 'flex items-center justify-center bg-gray-50' : ''">
+    <router-outlet></router-outlet>
+  </main>
+  
+  <footer *ngIf="isAuthenticated" class="bg-gray-100 border-t mt-8 py-6">
+    <div class="container mx-auto text-center text-sm text-gray-600">
+      <p>&copy; 2024 Mini Delivery Tracker. Built with Angular & Spring Boot.</p>
+    </div>
+  </footer>
+</div>
