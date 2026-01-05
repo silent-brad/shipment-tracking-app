@@ -5,9 +5,17 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    frontend = {
+      url = "./frontend";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    backend = {
+      url = "./backend";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, frontend, backend }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -58,9 +66,13 @@
         ];
 
         # Scripts for easy management
-        startScript = pkgs.writeShellScriptBin "start-delivery-tracker" ''
+        startScript = pkgs.writeShellScriptBin "start" ''
           set -e
           echo "🚀 Starting Mini Delivery Tracker..."
+
+          # Add Docker images to local registry
+          docker load < ${frontend.packages.${system}.dockerImage}
+          docker load < ${backend.packages.${system}.dockerImage}
 
           # Start Minikube if not running
           if ! ${pkgs.minikube}/bin/minikube status | grep -q "Running"; then
@@ -71,23 +83,6 @@
           # Configure Docker to use Minikube's Docker daemon
           echo "Configuring Docker environment..."
           eval $(${pkgs.minikube}/bin/minikube docker-env --shell=bash)
-
-          # Build Docker images
-          echo "Building Docker images..."
-          echo "Building backend image..."
-          cd backend
-          ./mvnw clean package -DskipTests
-          ${pkgs.docker}/bin/docker build -t delivery-tracker/backend:latest .
-          cd ..
-
-          echo "Building frontend image..."
-          cd frontend
-          ${pkgs.nodejs_20}/bin/npm ci
-          ${pkgs.nodejs_20}/bin/npm run build:prod
-          ${pkgs.docker}/bin/docker build -t delivery-tracker/frontend:latest .
-          cd ..
-
-          echo "Docker images built successfully"
 
           # Deploy to Kubernetes
           echo "Deploying to Kubernetes..."
@@ -132,45 +127,18 @@
 
           wait
         '';
-
-        buildScript = pkgs.writeShellScriptBin "build-delivery-tracker" ''
-          set -e
-          echo "🔨 Building Mini Delivery Tracker..."
-
-          # Build backend
-          echo "Building Spring Boot backend..."
-          cd backend
-          ./mvnw clean package -DskipTests
-          cd ..
-
-          # Build frontend
-          echo "Building Angular frontend..."
-          cd frontend
-          npm ci
-          npm run build:prod
-          cd ..
-
-          # Build Docker images
-          echo "Building Docker images..."
-          docker build -t delivery-tracker/backend:latest ./backend
-          docker build -t delivery-tracker/frontend:latest ./frontend
-          docker build -t delivery-tracker/postgres:latest ./infra/docker/postgres
-
-          echo "✅ Build completed!"
-        '';
-
       in {
         devShells.default = pkgs.mkShell {
-          buildInputs = devTools ++ [ startScript buildScript ];
+          buildInputs = devTools ++ [ startScript ];
 
           shellHook = ''
             echo "🎯 Mini Delivery Tracker Development Environment"
             echo "================================================="
             echo "Available commands:"
-            echo "  start-delivery-tracker  - Start all services"
-            echo "  build-delivery-tracker  - Build all components"
-            echo "  minikube start         - Start Minikube cluster"
-            echo "  kubectl get pods       - Check pod status"
+            echo "  start            - Start all services"
+            echo "  build            - Build all components"
+            echo "  minikube start   - Start Minikube cluster"
+            echo "  kubectl get pods - Check pod status"
             echo ""
             echo "Java version: ${jdk.version}"
             echo "Node.js version: ${node.version}"
@@ -200,7 +168,7 @@
 
         apps.default = {
           type = "app";
-          program = "${startScript}/bin/start-delivery-tracker";
+          program = "${startScript}/bin/start";
         };
       });
 }
