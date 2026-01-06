@@ -77,7 +77,8 @@
           # Start Minikube if not running
           if ! ${pkgs.minikube}/bin/minikube status | grep -q "Running"; then
             echo "Starting Minikube..."
-            ${pkgs.minikube}/bin/minikube start --driver=docker
+            #$\{pkgs.minikube}/bin/minikube start --driver=docker --cpus=6 --memory=8190
+            ${pkgs.minikube}/bin/minikube start --driver=docker --cpus=2 --memory=4096
           fi
 
           # Configure Docker to use Minikube's Docker daemon
@@ -131,10 +132,11 @@
 
           # Wait for services to be ready
           echo "Waiting for services to be ready..."
-          ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=mongodb -n delivery-tracker --timeout=300s
-          ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=kafka -n delivery-tracker --timeout=300s
-          ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=backend -n delivery-tracker --timeout=600s
-          ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=frontend -n delivery-tracker --timeout=300s
+          ${pkgs.kubectl}/bin/kubectl rollout status deployment/mongodb -n delivery-tracker --timeout=600s
+          ${pkgs.kubectl}/bin/kubectl rollout status deployment/zookeeper -n delivery-tracker --timeout=300s
+          ${pkgs.kubectl}/bin/kubectl rollout status statefulset/kafka -n delivery-tracker --timeout=1800s
+          ${pkgs.kubectl}/bin/kubectl rollout status deployment/backend -n delivery-tracker --timeout=600s
+          ${pkgs.kubectl}/bin/kubectl rollout status deployment/frontend -n delivery-tracker --timeout=300s
 
           # Setup port forwarding
           echo "Setting up port forwarding..."
