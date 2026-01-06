@@ -79,8 +79,14 @@ cd frontend && npm test
                        └──────────────┘
 ```
 
-## Environment Variables for Cloudflare Tunnel
+## Environment Configuration
 
+Create `.env` file in the root directory:
+```bash
+cp backend/.env.example .env
+```
+
+For Cloudflare Tunnel, also set:
 ```bash
 export CLOUDFLARE_TOKEN=your_cloudflare_token
 export TUNNEL_DOMAIN=your-domain.com

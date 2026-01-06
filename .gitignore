@@ -31,6 +31,10 @@ frontend/result
 !frontend/src/
 !frontend/src/**
 
+# Environment variables
+*.env
+!*.env.example
+
 !backend/
 backend/target
 backend/result

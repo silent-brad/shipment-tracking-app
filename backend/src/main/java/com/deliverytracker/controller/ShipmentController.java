@@ -60,7 +60,7 @@ public class ShipmentController {
         @ApiResponse(responseCode = "404", description = "Shipment not found")
     })
     public ResponseEntity<Shipment> getShipmentById(
-            @Parameter(description = "Shipment ID") @PathVariable Long id) {
+            @Parameter(description = "Shipment ID") @PathVariable String id) {
         return shipmentService.getShipmentById(id)
             .map(shipment -> ResponseEntity.ok(shipment))
             .orElse(ResponseEntity.notFound().build());
@@ -87,7 +87,7 @@ public class ShipmentController {
         @ApiResponse(responseCode = "404", description = "Shipment not found")
     })
     public ResponseEntity<Shipment> updateShipmentStatus(
-            @Parameter(description = "Shipment ID") @PathVariable Long id,
+            @Parameter(description = "Shipment ID") @PathVariable String id,
             @Valid @RequestBody ShipmentUpdateRequest request) {
         Shipment updatedShipment = shipmentService.updateShipmentStatus(id, request);
         return ResponseEntity.ok(updatedShipment);
@@ -100,7 +100,7 @@ public class ShipmentController {
         @ApiResponse(responseCode = "404", description = "Shipment not found")
     })
     public ResponseEntity<Void> deleteShipment(
-            @Parameter(description = "Shipment ID") @PathVariable Long id) {
+            @Parameter(description = "Shipment ID") @PathVariable String id) {
         shipmentService.deleteShipment(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,50 +1,42 @@
 package com.deliverytracker.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity
-@Table(name = "shipments")
+@Document(collection = "shipments")
 public class Shipment {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     
     @NotBlank(message = "Origin is required")
-    @Column(nullable = false)
     private String origin;
     
     @NotBlank(message = "Destination is required")
-    @Column(nullable = false)
     private String destination;
     
     @NotNull(message = "Status is required")
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ShipmentStatus status;
     
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
     
-    @UpdateTimestamp
-    @Column(name = "updated_at")
+    @LastModifiedDate
     private LocalDateTime updatedAt;
     
-    @Column(name = "tracking_number", unique = true)
+    @Indexed(unique = true)
     private String trackingNumber;
     
-    @Column(name = "estimated_delivery")
     private LocalDateTime estimatedDelivery;
     
-    @Column(name = "description")
     private String description;
     
     public Shipment() {}
@@ -56,11 +48,11 @@ public class Shipment {
     }
     
     // Getters and setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     

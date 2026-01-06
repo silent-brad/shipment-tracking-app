@@ -46,7 +46,7 @@
           kubernetes-helm
 
           # Database
-          postgresql
+          mongodb
 
           # Messaging
           kafkactl
@@ -84,6 +84,34 @@
           echo "Configuring Docker environment..."
           eval $(${pkgs.minikube}/bin/minikube docker-env --shell=bash)
 
+          # Load environment variables and process templates
+          echo "Loading environment variables from infra/k8s/.env..."
+          if [ -f "infra/k8s/.env" ]; then
+            # Read and convert all variables to base64 with _B64 suffix
+            while IFS= read -r line; do
+              if [[ ! "$line" =~ ^#.* ]] && [[ "$line" == *=* ]]; then
+                var_name=$(echo "$line" | cut -d'=' -f1)
+                var_value=$(echo "$line" | cut -d'=' -f2-)
+                # Export original variable
+                export "$var_name=$var_value"
+                # Export base64 encoded version with _B64 suffix
+                encoded_value=$(echo -n "$var_value" | ${pkgs.coreutils}/bin/base64 -w 0)
+                export "''${var_name}_B64=$encoded_value"
+              fi
+            done < infra/k8s/.env
+          fi
+
+          # Process template files with environment variable substitution
+          echo "Processing Kubernetes manifests with environment variables..."
+          mkdir -p /tmp/k8s-processed
+          for file in infra/k8s/*.yaml; do
+            if [ -f "$file" ] && [ "$(basename "$file")" != "namespace.yaml" ]; then
+              ${pkgs.envsubst}/bin/envsubst < "$file" > "/tmp/k8s-processed/$(basename "$file")"
+            else
+              cp "$file" "/tmp/k8s-processed/$(basename "$file")"
+            fi
+          done
+
           # Deploy to Kubernetes
           echo "Deploying to Kubernetes..."
           # Apply namespace first and wait for it to be ready
@@ -96,14 +124,14 @@
             echo "Namespace delivery-tracker is already active"
           fi
           # Apply remaining resources
-          ${pkgs.kubectl}/bin/kubectl apply -f infra/k8s/postgres.yaml
-          ${pkgs.kubectl}/bin/kubectl apply -f infra/k8s/kafka.yaml
-          ${pkgs.kubectl}/bin/kubectl apply -f infra/k8s/backend.yaml
-          ${pkgs.kubectl}/bin/kubectl apply -f infra/k8s/frontend.yaml
+          ${pkgs.kubectl}/bin/kubectl apply -f /tmp/k8s-processed/mongodb.yaml
+          ${pkgs.kubectl}/bin/kubectl apply -f /tmp/k8s-processed/kafka.yaml
+          ${pkgs.kubectl}/bin/kubectl apply -f /tmp/k8s-processed/backend.yaml
+          ${pkgs.kubectl}/bin/kubectl apply -f /tmp/k8s-processed/frontend.yaml
 
           # Wait for services to be ready
           echo "Waiting for services to be ready..."
-          ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=postgres -n delivery-tracker --timeout=300s
+          ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=mongodb -n delivery-tracker --timeout=300s
           ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=kafka -n delivery-tracker --timeout=300s
           ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=backend -n delivery-tracker --timeout=600s
           ${pkgs.kubectl}/bin/kubectl wait --for=condition=ready pod -l app=frontend -n delivery-tracker --timeout=300s

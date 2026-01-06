@@ -4,8 +4,8 @@ import com.deliverytracker.model.Shipment;
 import com.deliverytracker.model.ShipmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
+public interface ShipmentRepository extends MongoRepository<Shipment, String> {
     
     Optional<Shipment> findByTrackingNumber(String trackingNumber);
     
@@ -22,15 +22,15 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     
     Page<Shipment> findByStatusIn(List<ShipmentStatus> statuses, Pageable pageable);
     
-    @Query("SELECT s FROM Shipment s WHERE s.origin LIKE %:location% OR s.destination LIKE %:location%")
-    List<Shipment> findByLocation(@Param("location") String location);
+    @Query("{ $or: [ { 'origin': { $regex: ?0, $options: 'i' } }, { 'destination': { $regex: ?0, $options: 'i' } } ] }")
+    List<Shipment> findByLocation(String location);
     
-    @Query("SELECT s FROM Shipment s WHERE s.createdAt BETWEEN :start AND :end")
-    List<Shipment> findByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    @Query("{ 'createdAt': { $gte: ?0, $lte: ?1 } }")
+    List<Shipment> findByDateRange(LocalDateTime start, LocalDateTime end);
     
-    @Query("SELECT s FROM Shipment s WHERE s.estimatedDelivery < :date AND s.status NOT IN :terminalStatuses")
-    List<Shipment> findOverdueShipments(@Param("date") LocalDateTime date, @Param("terminalStatuses") List<ShipmentStatus> terminalStatuses);
+    @Query("{ 'estimatedDelivery': { $lt: ?0 }, 'status': { $nin: ?1 } }")
+    List<Shipment> findOverdueShipments(LocalDateTime date, List<ShipmentStatus> terminalStatuses);
     
-    @Query("SELECT COUNT(s) FROM Shipment s WHERE s.status = :status")
-    long countByStatus(@Param("status") ShipmentStatus status);
+    @Query(value = "{ 'status': ?0 }", count = true)
+    long countByStatus(ShipmentStatus status);
 }

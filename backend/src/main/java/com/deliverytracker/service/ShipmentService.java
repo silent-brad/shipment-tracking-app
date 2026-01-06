@@ -12,15 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@Transactional
 public class ShipmentService {
     
     private static final Logger logger = LoggerFactory.getLogger(ShipmentService.class);
@@ -57,27 +54,23 @@ public class ShipmentService {
         return savedShipment;
     }
     
-    @Transactional(readOnly = true)
     public List<Shipment> getAllShipments() {
         return shipmentRepository.findAll();
     }
     
-    @Transactional(readOnly = true)
     public Page<Shipment> getAllShipments(Pageable pageable) {
         return shipmentRepository.findAll(pageable);
     }
     
-    @Transactional(readOnly = true)
-    public Optional<Shipment> getShipmentById(Long id) {
+    public Optional<Shipment> getShipmentById(String id) {
         return shipmentRepository.findById(id);
     }
     
-    @Transactional(readOnly = true)
     public Optional<Shipment> getShipmentByTrackingNumber(String trackingNumber) {
         return shipmentRepository.findByTrackingNumber(trackingNumber);
     }
     
-    public Shipment updateShipmentStatus(Long id, ShipmentUpdateRequest request) {
+    public Shipment updateShipmentStatus(String id, ShipmentUpdateRequest request) {
         Shipment shipment = shipmentRepository.findById(id)
             .orElseThrow(() -> new BusinessException("Shipment not found with ID: " + id));
         
@@ -101,7 +94,7 @@ public class ShipmentService {
         return updatedShipment;
     }
     
-    public void deleteShipment(Long id) {
+    public void deleteShipment(String id) {
         if (!shipmentRepository.existsById(id)) {
             throw new BusinessException("Shipment not found with ID: " + id);
         }
@@ -110,15 +103,13 @@ public class ShipmentService {
         shipmentRepository.deleteById(id);
         
         // Publish event to Kafka
-        kafkaProducerService.publishShipmentEvent(null, "SHIPMENT_DELETED", id.toString());
+        kafkaProducerService.publishShipmentEvent(null, "SHIPMENT_DELETED", id);
     }
     
-    @Transactional(readOnly = true)
     public List<Shipment> getShipmentsByStatus(ShipmentStatus status) {
         return shipmentRepository.findByStatus(status);
     }
     
-    @Transactional(readOnly = true)
     public List<Shipment> getOverdueShipments() {
         List<ShipmentStatus> terminalStatuses = List.of(
             ShipmentStatus.DELIVERED, 

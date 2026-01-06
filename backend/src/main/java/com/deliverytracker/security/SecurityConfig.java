@@ -1,6 +1,7 @@
 package com.deliverytracker.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +30,12 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtTokenProvider jwtTokenProvider;
     
+    @Value("${ADMIN_PASSWORD:admin123}")
+    private String adminPassword;
+    
+    @Value("${USER_PASSWORD:user123}")
+    private String userPassword;
+    
     @Autowired
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                          JwtTokenProvider jwtTokenProvider) {
@@ -51,13 +58,13 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.builder()
             .username("admin")
-            .password(passwordEncoder().encode("admin123"))
+            .password(passwordEncoder().encode(adminPassword))
             .roles("ADMIN")
             .build();
         
         UserDetails user = User.builder()
             .username("user")
-            .password(passwordEncoder().encode("user123"))
+            .password(passwordEncoder().encode(userPassword))
             .roles("USER")
             .build();
         

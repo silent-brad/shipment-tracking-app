@@ -13,7 +13,7 @@
 
         src = ./.;
 
-        mvnHash = "sha256-VpwUNEZYwvnK4KYaNosp2s+S54bt6DyYUdoRcoLt9KE=";
+        mvnHash = "sha256-INeAhUGqr15j4Y4Tg2uAEkwcLxcQ3sQkhZUwWX/+t4Y=";
 
         nativeBuildInputs = with pkgs; [ openjdk21 ];
 
