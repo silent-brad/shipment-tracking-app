@@ -77,8 +77,8 @@
           # Start Minikube if not running
           if ! ${pkgs.minikube}/bin/minikube status | grep -q "Running"; then
             echo "Starting Minikube..."
-            #$\{pkgs.minikube}/bin/minikube start --driver=docker --cpus=6 --memory=8190
-            ${pkgs.minikube}/bin/minikube start --driver=docker --cpus=2 --memory=4096
+            #$\{pkgs.minikube}/bin/minikube start --driver=docker --cpus=6 --memory=8190 --force
+            ${pkgs.minikube}/bin/minikube start --driver=docker --cpus=2 --memory=4096 --force
           fi
 
           # Configure Docker to use Minikube's Docker daemon
